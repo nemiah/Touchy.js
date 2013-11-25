@@ -19,51 +19,33 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Touchy.js test page</title>
+		<title>Touchy.js demo page</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		
 		<script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
 		<script type="text/javascript" src="js/snap.svg/snap.svg-min.js"></script>
-		<script type="text/javascript" src="Touchy.js"></script>
 		
-        <link rel="stylesheet" href="css/normalize.css">
-        <link rel="stylesheet" href="css/main.css">
-		<style type="text/css">
-			.touchy-wheel-circle, .touchy-wheel-text {
-				cursor:pointer;
-			}
-			
-			.touchy-wheel-text {
-				fill:black;
-				-moz-user-select: none;
-				-webkit-user-select: none;
-				-ms-user-select: none;
-			}
-			
-			.touchy-wheel-circle {
-				fill:orange;
-			}
-			.touchy-wheel-background {
-				fill: white;
-				stroke:white;
-				strokeWidth:1px;
-			}
-			
-			.divButton {
-				background-color:#ddd;
-				padding:10px;
-				cursor:pointer;
-			}
-			
-			.divButton:hover {
-				background-color:#eee;
-			}
-		</style>
+        <link rel="stylesheet" type="text/css" href="css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="css/main.css">
+		<link rel="stylesheet" type="text/css" href="css/demo.css" />
+		
+		<!-- THIS IS WHAT YOU NEED: -->
+		<script type="text/javascript" src="Touchy.js"></script>
+		<link rel="stylesheet" type="text/css" href="Touchy.css" />
+		<!-- END -->
 	</head>
 	<body>
-		<div class="divButton" id="touchyWheel" style="margin-left:200px;margin-top:200px;display:inline-block;">Wheel selector</div>
+		<h1>Touchy.js demo page</h1>
+		<div class="divButton" id="wheelTouchy" style="margin-left:200px;margin-top:200px;display:inline-block;">Wheel selector</div>
+		<div id="wheelSelected"></div>
+		
 		<script type="text/javascript">
-			Touchy.wheel($('#touchyWheel'), {data: ["17,0°", "21,0°", "21,5°", "22,0°", "22,5°", "23,0°", "28,0°"]});
+			Touchy.wheel($('#wheelTouchy'), {
+				data: ["17,0°", "21,0°", "21,5°", "22,0°", "22,5°", "23,0°", "28,0°"],
+				selection: function(value){
+					$('#wheelSelected').html(value);
+				}
+			});
 		</script>
 	</body>
 </html>
