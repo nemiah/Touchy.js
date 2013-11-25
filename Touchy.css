@@ -33,7 +33,7 @@
 }
 
 .touchy-wheel-circle {
-	fill:orange;
+	fill:#d9e800;
 	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -41,9 +41,27 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	
+    transition: fill 200ms linear;
 }
 .touchy-wheel-background {
 	fill: white;
-	stroke:white;
+	/*stroke:#d9e800;
+	strokeWidth:1px;*/
+}
+
+.touchy-wheel-close .touchy-wheel-circle {
+	fill:transparent;
+	stroke:#d9e800;
 	strokeWidth:1px;
+}
+
+.touchy-wheel-close .touchy-wheel-polyline {
+	fill:#d9e800;
+}
+
+.touchy-wheel-value {
+	fill:#aacc00;
+	
+    transition: fill 200ms linear;
 }

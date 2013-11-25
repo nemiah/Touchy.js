@@ -20,12 +20,11 @@
 
 var Touchy = {
 	jQuery: $,
-			
-	wheel: function(element, options, triggerOn){
-		if(typeof triggerOn === "undefined")
-			triggerOn = "click";
-		
-		Touchy.jQuery(element).on(triggerOn, function(event){
+	svgX: [28,22.398, 19.594,14, 28,5.602, 22.398,0, 14,8.402, 5.598,0, 0,5.602, 8.398,14, 0,22.398, 5.598,28, 14,19.598, 22.398,28],
+	trigger: "click",
+	
+	wheel: function(element, options){
+		Touchy.jQuery(element).on(Touchy.trigger, function(event){
 			Touchy.wheelOnFire(event, options);
 		});
 	},
@@ -33,7 +32,7 @@ var Touchy = {
 	wheelOnFire: function(event, options){
 		var circles = options.data;
 
-		var length = 0;
+		var length = 1; //close button
 		for(var propertyName in circles)
 			length++;
 
@@ -47,13 +46,26 @@ var Touchy = {
 		var s = Snap(width, height);
 		Touchy.jQuery(s.node).css("position","absolute");
 		
-		var posX = event.clientX - width / 2;
-		var posY = event.clientY - height / 2;
+		if(event.clientX){
+			var posX = event.clientX - width / 2;
+			var posY = event.clientY - height / 2;
+		}
+		
+		else if(event.changedTouches[event.changedTouches.length - 1]){
+			var posX = event.changedTouches[event.changedTouches.length - 1].clientX - width / 2;
+			var posY = event.changedTouches[event.changedTouches.length - 1].clientY - height / 2;
+		}
 		
 		if(posX < 10)
 			posX = 10;
 		if(posY < 10)
 			posY = 10;
+		
+		if(posX + width > Touchy.jQuery(window).width())
+			posX = Touchy.jQuery(window).width() - width - 10;
+		
+		if(posY + height > Touchy.jQuery(window).height())
+			posY = Touchy.jQuery(window).height() - height - 10;
 		
 		Touchy.jQuery(s.node).css("position","absolute").css("top", posY).css("left", posX);
 		
@@ -61,9 +73,13 @@ var Touchy = {
 		var startX = radiusBig + radiusSmall + 5;
 		var startY = radiusBig + radiusSmall + 5;
 		
-		var bigC = s.circle(startX, startY, radiusBig);
+		var bigC = s.circle(startX, startY, radiusBig + radiusSmall + 5);
 		bigC.attr({"fill-opacity": 0, "class": "touchy-wheel-background"});
 		bigC.animate({"fill-opacity": .5}, 700);
+		
+		var currentValue = null;
+		if(typeof options.value === "function")
+			currentValue = options.value();
 		
 		var i = 0;
 		for(var value in circles){
@@ -71,7 +87,7 @@ var Touchy = {
 			var y = Math.sin(i * winkel - (Math.PI / 4)) * radiusBig;
 
 			var c = s.circle(startX + x, startY + y, 0);
-			c.attr({"class": "touchy-wheel-circle", "fill-opacity": 1});
+			c.attr({"class": "touchy-wheel-circle"+(currentValue == value ? " touchy-wheel-value" : ""), "fill-opacity": 1});
 
 			var tt = s.text(-100, -100, circles[value]);
 			var t = s.text(startX + x - (tt.getBBox().width / 2), startY + y + (tt.getBBox().height / 4), circles[value]);
@@ -105,36 +121,6 @@ var Touchy = {
 				this.select("circle").animate({r: radiusSmall}, 100);
 			});
 
-			Touchy.jQuery(g.node).on("click touchend", function(event){
-				event.preventDefault();
-				event.stopPropagation();
-				//console.log(Touchy.jQuery(event.target).parent().get(0).touchyValue);
-				options.selection(Touchy.jQuery(event.target).parent().get(0).touchyValue);
-				
-				var current = this;
-				var i = 0;
-				Touchy.jQuery(this).parent().find("g").each(function(v, k){
-					if(current.isEqualNode(k))
-						return true;
-					
-					Snap(k).select("text").animate({"fill-opacity": 0}, 100, null, function(){ this.remove(); });
-					Snap(k).select("circle").animate({r: 0}, 100 + i * 100, null, function(){ this.remove(); });
-					i++;
-				});
-				
-				Snap(current).parent().select("circle").animate({"fill-opacity": 0}, 100);
-				
-				window.setTimeout(function(){
-					Snap(current).select("circle").animate({r: 0}, 200, null, function(){
-						this.parent().parent().remove();
-						this.remove();
-					});
-					Snap(current).select("text").animate({"fill-opacity": 0}, 100, null, function(){ });
-				}, 500);
-				
-				return false;
-			});
-
 			window.setTimeout(function(lc){
 				lc.animate({r: radiusSmall}, 150);
 			}, i * 80, c);
@@ -147,5 +133,83 @@ var Touchy = {
 
 			i++;
 		}
+		
+		
+		var x = Math.cos(i * winkel - (Math.PI / 4)) * radiusBig;
+		var y = Math.sin(i * winkel - (Math.PI / 4)) * radiusBig;
+
+		var c = s.circle(startX + x, startY + y, 0);
+		c.attr({"class": "touchy-wheel-circle", "fill-opacity": 1});
+
+		g = s.g(c);
+		g.attr({"class": "touchy-wheel-close", "fill-opacity": 0});
+			
+		g.mouseover(function(){
+			this.select("circle").animate({r: radiusSmall + 5}, 100);
+		});
+
+		g.touchstart(function(){
+			this.select("circle").animate({r: radiusSmall + 5}, 100);
+		});
+
+
+		g.mouseout(function(){
+			this.select("circle").animate({r: radiusSmall}, 100);
+		});
+
+		g.touchend(function(){
+			this.select("circle").animate({r: radiusSmall}, 100);
+		});
+
+
+		g.touchcancel(function(){
+			this.select("circle").animate({r: radiusSmall}, 100);
+		});
+		
+		window.setTimeout(function(lc){
+			lc.animate({r: radiusSmall}, 150);
+		}, i * 80, c);
+		
+		Touchy.jQuery(s.node).find("g").on(Touchy.trigger, function(event){
+			event.preventDefault();
+			event.stopPropagation();
+
+			var value = Touchy.jQuery(event.target).parent().get(0).touchyValue;
+			if(typeof value !== "undefined"){
+				var lastValue = Touchy.jQuery(this).parent().find(".touchy-wheel-value").get(0);
+				if(lastValue)
+					Snap(lastValue).attr({"class": "touchy-wheel-circle"});
+				
+				Snap(this).select("circle").attr({"class": "touchy-wheel-circle touchy-wheel-value"});
+				options.selection(value);
+			}
+			
+			var current = this;
+			var i = 0;
+			Touchy.jQuery(this).parent().find("g").each(function(v, k){
+				if(current.isEqualNode(k))
+					return true;
+				
+				if(Snap(k).select("text"))
+					Snap(k).select("text").animate({"fill-opacity": 0}, 100, null, function(){ this.remove(); });
+				
+				Snap(k).select("circle").animate({r: 0}, 100 + i * 100, null, function(){ this.remove(); });
+				i++;
+			});
+
+			Snap(current).parent().select("circle").animate({"fill-opacity": 0}, 100);
+
+			window.setTimeout(function(){
+				Snap(current).select("circle").animate({r: 0}, 200, null, function(){
+					this.parent().parent().remove();
+					this.remove();
+				});
+				
+				if(Snap(current).select("text"))
+					Snap(current).select("text").animate({"fill-opacity": 0}, 100, null, function(){ });
+			}, 500);
+
+			return false;
+		});
 	}
 };
