@@ -50,13 +50,13 @@
 	strokeWidth:1px;*/
 }
 
-.touchy-wheel-close .touchy-wheel-circle {
+.touchy-wheel-cancel .touchy-wheel-circle {
 	fill:transparent;
 	stroke:#d9e800;
 	strokeWidth:1px;
 }
 
-.touchy-wheel-close .touchy-wheel-polyline {
+.touchy-wheel-cancel .touchy-wheel-polyline {
 	fill:#d9e800;
 }
 
