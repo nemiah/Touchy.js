@@ -1,62 +1,116 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Touchy.js</title>
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+		
+		<link rel="stylesheet" type="text/css" href="master/css/demo.css" />
+		<link href='http://fonts.googleapis.com/css?family=Neucha' rel='stylesheet' type='text/css'>
+		
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-	<link rel="stylesheet" type="text/css" href="master/css/demo.css" />
-    
-	<!-- THIS IS WHAT YOU NEED: -->
-	<script type="text/javascript" src="master/js/jquery-2.0.3.min.js"></script>
-	<script type="text/javascript" src="master/js/snap.svg/snap.svg-min.js"></script>
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/touchy.css">
+
+		<!-- THIS IS WHAT YOU NEED: -->
+		<script type="text/javascript" src="master/js/jquery-2.0.3.min.js"></script>
+		<script type="text/javascript" src="master/js/snap.svg/snap.svg-min.js"></script>
+
+		<script type="text/javascript" src="master/Touchy.js"></script>
+		<link rel="stylesheet" type="text/css" href="master/Touchy.css" />
+		<!-- END -->
 	
-	<script type="text/javascript" src="master/Touchy.js"></script>
-	<link rel="stylesheet" type="text/css" href="master/Touchy.css" />
-	<!-- END -->
-		
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>Touchy.js</h1>
-        <p>JavaScript library for touch optimized data input</p>
+    </head>
+    <body>
+		<header>
+			<a href="https://github.com/nemiah/Touchy.js">
+				<img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+			</a>
+			
+			<h1>Touchy.js</h1>
+			<p style="color:grey;">JavaScript library for touch optimized input elements</p>
+		</header>
 
-        <p class="view"><a href="https://github.com/nemiah/Touchy.js">View the Project on GitHub <small>nemiah/Touchy.js</small></a></p>
-        <p class="view"><a href="https://github.com/nemiah/Touchy.js/zipball/master">Download <small>ZIP File</small></a></p>
+		<section>
+			<h2>Wheel selector</h2>
 
-      </header>
+			<div class="divButton" id="wheelTouchy" style="display:inline-block;margin-right:1em;">Wheel selector</div>
+			<div style="display:inline-block;">Selected: <span id="wheelSelected">17.0</span></div>
+			<h3>Usage</h3>
+			<pre>
+Touchy.wheel($('#wheelTouchy'), {
+	data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°",
+		"22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
+	selection: function(value) {
+		$('#wheelSelected').html(value);
+	},
+	value: function() {
+		return $('#wheelSelected').html();
+	}
+});</pre>
+			<script type="text/javascript">
+				Touchy.wheel($('#wheelTouchy'), {
+					data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°", "22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
+					selection: function(value) {
+						$('#wheelSelected').html(value);
+					},
+					value: function() {
+						return $('#wheelSelected').html();
+					}
+				});
+			</script>
+
+			<h2>Used libraries</h2>
+			<ul>
+				<li><a href="http://jquery.com" target="_blank">jQuery</a></li>
+				<li><a href="http://snapsvg.io" target="_blank">snap.svg</a></li>
+			</ul>
+			
+			<h2>Get involved</h2>
+			<p>Touchy.js is developed on <a href="https://github.com/nemiah/Touchy.js">Github</a></p>
+			
+		</section>
+
+		<footer></footer>
 		
-      <section>
-        <h3>This is what it's about</h3>
-		
-		<div class="divButton" id="wheelTouchy" style="margin-top:100px;display:inline-block;margin-right:10px;">Wheel selector</div>
-		<div style="display:inline-block;">Selected: <span id="wheelSelected">17.0</span></div>
-		
+		<!-- Piwik -->
 		<script type="text/javascript">
-			Touchy.wheel($('#wheelTouchy'), {
-				data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°", "22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
-				selection: function(value){
-					$('#wheelSelected').html(value);
-				},
-				value: function(){
-					return $('#wheelSelected').html();
-				}
-			});
+			var _paq = _paq || [];
+			_paq.push(["trackPageView"]);
+			_paq.push(["enableLinkTracking"]);
+
+			(function() {
+				var u = (("https:" == document.location.protocol) ? "https" : "http") + "://www.open3a.de/piwik/";
+				_paq.push(["setTrackerUrl", u + "piwik.php"]);
+				_paq.push(["setSiteId", "15"]);
+				var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
+				g.type = "text/javascript";
+				g.defer = true;
+				g.async = true;
+				g.src = u + "piwik.js";
+				s.parentNode.insertBefore(g, s);
+			})();
 		</script>
-		
-      </section>
-      <footer>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
-  </body>
+		<!-- End Piwik Code -->
+		<!-- AddThis Smart Layers BEGIN -->
+		<!-- Go to http://www.addthis.com/get/smart-layers to customize -->
+		<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=xa-529b681f0f7700ac"></script>
+		<script type="text/javascript">
+		  addthis.layers({
+			'theme' : 'transparent',
+			'share' : {
+			  'position' : 'left',
+			  'numPreferredServices' : 5
+			}   
+		  });
+		</script>
+		<!-- AddThis Smart Layers END -->
+    </body>
 </html>
