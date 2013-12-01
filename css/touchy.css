@@ -1,10 +1,3 @@
-/* 
-    Document   : touchy
-    Created on : 01.12.2013, 17:22:56
-    Author     : nemiah
-    Description:
-        Purpose of the stylesheet follows.
-*/
 
 h1 {
 	font-family: 'Neucha', cursive;
@@ -19,7 +12,7 @@ h2 {
 }
 
 h3 {
-	margin-top:4%;
+	margin-top:5%;
 	font-size:1.7em;
 	font-family: 'Neucha', cursive;
 	margin-bottom:-.9em;
@@ -42,9 +35,13 @@ section {
 }
 
 pre {
+	margin-top:2em;
 	font-size:.9em;
-	background-color: rgb(255,235,70);
+	/*border-top:0.2em solid #ffe400;
+	border-bottom:0.2em solid #ffe400;*/
+	background-color:#fffcde;
 	padding:1em;
+	padding-left:10%;
 }
 
 footer {
