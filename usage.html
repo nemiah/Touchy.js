@@ -39,16 +39,17 @@
 	<body>
 		<h1>Touchy.js demo page</h1>
 		<div class="divButton" id="touchyWheel" style="margin-left:20px;margin-top:100px;display:inline-block;margin-right:10px;">Wheel selector</div>
-		<div style="display:inline-block;">Selected: <span id="selectedWheel">17.0</span></div>
+		<div style="display:inline-block;">Selected: <span id="selectedWheelValue">17.0</span>; <span id="selectedWheelLabel">17,0°</span></div>
 		
 		<script type="text/javascript">
 			Touchy.wheel($('#touchyWheel'), {
 				data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°", "22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
-				selection: function(value){
-					$('#selectedWheel').html(value);
+				selection: function(value, label){
+					$('#selectedWheelValue').html(value);
+					$('#selectedWheelLabel').html(label);
 				},
 				value: function(){
-					return $('#selectedWheel').html();
+					return $('#selectedWheelValue').html();
 				}
 			});
 		</script>
@@ -60,14 +61,16 @@
 		<script type="text/javascript">
 			Touchy.wheel($('#touchyWheelMulti'), {
 				data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°", "22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
-				selection: function(value){
-					$('#selectedWheelMulti').html(value);
+				selection: function(values){
+					$('#selectedWheelMulti').html(values.join(";"));
 				},
 				value: function(){
-					return $('#selectedWheelMulti').html();
+					return $('#selectedWheelMulti').html().split(";");
 				},
 				multi: true
 			});
 		</script>
+		<p style="margin-bottom:500px;"></p>
+		
 	</body>
 </html>

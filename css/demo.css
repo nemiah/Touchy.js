@@ -20,11 +20,12 @@ body {
 	padding-left:10px;
 }
 .divButton {
-	background-color:#ddd;
+	background-color:#eb00a6;
 	padding:10px;
 	cursor:pointer;
+	color:white;
 }
 
 .divButton:hover {
-	background-color:#eee;
+	background-color:#eb4bbc;
 }

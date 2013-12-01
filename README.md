@@ -1,3 +1,3 @@
 Touchy.js
 =========
-See usage.html for usage or http://touchyjs.io for online demo
+See http://touchyjs.io for online demo and usage information
