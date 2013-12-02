@@ -38,7 +38,8 @@
 	</head>
 	<body>
 		<h1>Touchy.js demo page</h1>
-		<div class="divButton" id="touchyWheel" style="margin-left:20px;margin-top:100px;display:inline-block;margin-right:10px;">Wheel selector</div>
+		
+		<div class="divButton" id="touchyWheel" style="margin-left:100px;margin-top:100px;display:inline-block;margin-right:10px;">Wheel selector</div>
 		<div style="display:inline-block;">Selected: <span id="selectedWheelValue">17.0</span>; <span id="selectedWheelLabel">17,0°</span></div>
 		
 		<script type="text/javascript">
@@ -55,7 +56,28 @@
 		</script>
 		<br />
 		
-		<div class="divButton" id="touchyWheelMulti" style="margin-left:20px;margin-top:50px;display:inline-block;margin-right:10px;">Wheel multi selector</div>
+		<div class="divButton" id="touchyWheelRotate" style="margin-left:100px;margin-top:100px;display:inline-block;margin-right:10px;">Wheel selector</div>
+		<div style="display:inline-block;">Selected: <span id="selectedWheelRotateValue">1</span>; <span id="selectedWheelRotateLabel">1</span></div>
+		
+		<script type="text/javascript">
+			var data = {};
+			for(var i = 0; i < 10; i++)
+				data[i+""] = i+"";
+			
+			Touchy.wheel($('#touchyWheelRotate'), {
+				data: data,
+				selection: function(value, label){
+					$('#selectedWheelRotateValue').html(value);
+					$('#selectedWheelRotateLabel').html(label);
+				},
+				value: function(){
+					return $('#selectedWheelRotateValue').html();
+				}
+			});
+		</script>
+		<br />
+		
+		<div class="divButton" id="touchyWheelMulti" style="margin-left:100px;margin-top:100px;display:inline-block;margin-right:10px;">Wheel multi selector</div>
 		<div style="display:inline-block;">Selected: <span id="selectedWheelMulti">17.0</span></div>
 		
 		<script type="text/javascript">

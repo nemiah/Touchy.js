@@ -22,6 +22,7 @@ var Touchy = {
 	jQuery: $,
 	svgX: [28,22.398, 19.594,14, 28,5.602, 22.398,0, 14,8.402, 5.598,0, 0,5.602, 8.398,14, 0,22.398, 5.598,28, 14,19.598, 22.398,28],
 	trigger: "click",
+	current: null,
 	
 	wheel: function(element, options){
 		Touchy.jQuery(element).on(Touchy.trigger, function(event){
@@ -47,10 +48,24 @@ var Touchy = {
 			var width = options.radiusBig * 2 + options.radiusSmallHover * 2;
 			var height = width;
 			
+			if(typeof options.position === "undefined")
+				options.position = Touchy.calc.position(event, width, height);
 			
-			var s = Touchy.draw.wheel(Touchy.calc.position(event, width, height), width, height, options);
+			
+			if(typeof options.winkel === "undefined")
+				options.winkel = Math.PI * 1.9 / Touchy.calc.elements(options);
+			
+			options.drag = {};
+			
+			var s = Touchy.draw.wheel(width, height, options);
+
+			options.paper = s;
 
 			Touchy.event.wheel(s, options);
+			
+			
+			
+			Touchy.current = options;
 		}
 	},
 	
@@ -147,10 +162,8 @@ var Touchy = {
 	},
 	
 	draw: {
-		wheel: function(pos, width, height, options){
-			var length = Touchy.calc.elements(options);
-			
-			var winkel = Math.PI * 1.9 / length;
+		wheel: function(width, height, options){
+			var pos = options.position;
 
 			var s = Snap(width, height);
 			Touchy.jQuery(s.node).css("position","absolute").css("top", pos[1]).css("left", pos[0]);
@@ -159,40 +172,51 @@ var Touchy = {
 			var startX = options.radiusBig + options.radiusSmallHover;
 			var startY = startX;
 
+			options.center = [startX, startY];
 
 			var bigC = s.circle(startX, startY, options.radiusBig + options.radiusSmallHover);
 			bigC.attr({"fill-opacity": 0, "class": "touchy-wheel-background"});
 			bigC.animate({"fill-opacity": .5}, 700);
 
+			options.elements = [];
 
 			var i = 0;
 			for(var key in options.data){
-				var x = Math.cos(i * winkel - (Math.PI / 4)) * options.radiusBig;
-				var y = Math.sin(i * winkel - (Math.PI / 4)) * options.radiusBig;
+				var bow = i * options.winkel - (Math.PI / 4);
+				var x = Math.cos(bow) * options.radiusBig;
+				var y = Math.sin(bow) * options.radiusBig;
 
-
-				var g = Touchy.draw.circle(s, [startX + x, startY + y], key, options.data[key], Touchy.calc.value(options) == key);
+				options.elements.push(
+					{"g" : Touchy.draw.circle(s, [startX + x, startY + y], key, options.data[key], Touchy.calc.value(options) == key)
+				});
+				
+				if(typeof options.drag.minPi === "undefined")
+					options.drag.minPi = bow;
+				
+				options.drag.maxPi = bow;
+				i++;
+			}
+			
+			for(var j = 0; j < options.elements.length; j++){
+				var g = options.elements[j].g;
 
 				Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
 
 
-				window.setTimeout(function(lc){
-					lc.animate({r: options.radiusSmall}, 150);
-				}, i * 80, g.select("circle"));
+				window.setTimeout(function(lc, lj){
+					lc.animate({r: options.radiusSmall/* * Math.abs(Math.sin(lj * options.winkel / 2))*/}, 150);
+				}, j * 80, g.select("circle"), j);
 
 				window.setTimeout(function(lt){
 					lt.animate({
 						"fill-opacity": 1
 					}, 200);
-				}, i * 100 + 200, g.select("text"));
-
-				i++;
+				}, j * 100 + 200, g.select("text"));
 			}
 
 			if(options.hasCancel){
-				var x = Math.cos(i * winkel - (Math.PI / 4)) * options.radiusBig;
-				var y = Math.sin(i * winkel - (Math.PI / 4)) * options.radiusBig;
-
+				var x = Math.cos(i * options.winkel - (Math.PI / 4)) * options.radiusBig;
+				var y = Math.sin(i * options.winkel - (Math.PI / 4)) * options.radiusBig;
 
 				var g = Touchy.draw.cancel(s, [startX + x, startY + y]);
 				Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
@@ -259,6 +283,88 @@ var Touchy = {
 
 			g.touchcancel(function(){
 				this.select("circle").animate({r: radiusDefault}, 100);
+			});
+			
+			g.drag(function(dx, dy){
+				var AB_x = Touchy.current.drag.startAt[0] - Touchy.current.center[0];
+				var AB_y = Touchy.current.drag.startAt[1] - Touchy.current.center[1];
+
+				var CD_x = Touchy.current.drag.startAt[0] + dx - Touchy.current.center[0];
+				var CD_y = Touchy.current.drag.startAt[1] + dy - Touchy.current.center[1];
+
+				var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
+				var bow = Math.acos(ort);
+				
+				var leftyRighty = CD_y * AB_x - AB_y * CD_x;
+				
+				var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
+				
+				bow *= sign;
+				
+				Touchy.current.drag.bow = bow;
+				bow += Touchy.current.drag.bowLast;
+				//console.log(Touchy.current.drag.bowLast);
+
+				/*var l = Touchy.current.secondLine;
+				l.attr({
+					"x2": Touchy.current.drag.startAt[0] + dx, 
+					"y2": Touchy.current.drag.startAt[1] + dy});*/
+				
+				
+				
+				for(var j = 0; j < Touchy.current.elements.length; j++){
+					var rot = j * Touchy.current.winkel - (Math.PI / 4) + bow;
+
+					/*if(rot > Touchy.current.drag.maxPi)
+						rot = Touchy.current.drag.maxPi;
+					else
+						if(rot < Touchy.current.drag.minPi)
+						rot = Touchy.current.drag.minPi; */
+					
+					var x = Math.cos(rot) * Touchy.current.radiusBig;
+					var y = Math.sin(rot) * Touchy.current.radiusBig;
+				
+					var g = Touchy.current.elements[j].g;
+					
+					//var norm = bow / Touchy.current.winkel * Math.PI;
+					
+					g.select("circle").attr({
+						"cx" : Touchy.current.center[0] + x,
+						"cy" : Touchy.current.center[1] + y//,
+						//"r" : Touchy.current.radiusSmall * Math.sin(norm)
+						});
+					//var t = s.text(x - (tt.getBBox().width / 2), y + (tt.getBBox().height / 4), label);
+					var t = g.select("text");
+					
+					t.attr({
+						"x" : Touchy.current.center[0] + x - (t.getBBox().width / 2), 
+						"y" : Touchy.current.center[1] + y + (t.getBBox().height / 4)});
+					
+				}
+				
+			},
+			function(){
+				Touchy.current.drag.startAt = [parseFloat(this.select("circle").attr("cx")), parseFloat(this.select("circle").attr("cy"))];
+				
+				if(typeof Touchy.current.drag.bow === "undefined"){
+					Touchy.current.drag.bow = 0;
+					Touchy.current.drag.bowLast = 0;
+				}
+				
+				/*var l1 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], this.select("circle").attr("cx"), this.select("circle").attr("cy"));
+				l1.attr({"stroke": "black"});
+				
+				var l2 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], this.select("circle").attr("cx"), this.select("circle").attr("cy"));
+				l2.attr({"stroke": "red"});
+				
+				Touchy.current.firstLine = l1;
+				Touchy.current.secondLine = l2;*/
+			},
+			function(){
+				/*Touchy.current.firstLine.remove();
+				Touchy.current.secondLine.remove();*/
+				
+				Touchy.current.drag.bowLast += Touchy.current.drag.bow;
 			});
 		}
 	}
