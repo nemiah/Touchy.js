@@ -26,7 +26,12 @@ var Touchy = {
 	
 	wheel: function(element, options){
 		Touchy.jQuery(element).on(Touchy.trigger, function(event){
+			event.preventDefault();
+			event.stopPropagation();
+					
 			Touchy.fire.wheel(event, options);
+			
+			return false;
 		});
 	},
 	
@@ -61,11 +66,9 @@ var Touchy = {
 
 			options.paper = s;
 
-			Touchy.event.wheel(s, options);
-			
-			
-			
 			Touchy.current = options;
+			
+			Touchy.event.wheel(s, options);
 		}
 	},
 	
@@ -113,6 +116,183 @@ var Touchy = {
 					//return false; //maybe required for preventing click event to bubble up
 
 				});
+
+
+
+				Touchy.jQuery(s.node).find("g").on("mouseover", function(event){
+					Snap(this).select("circle").animate({r: Touchy.current.radiusSmallHover}, 100);
+				});
+
+				Touchy.jQuery(s.node).find("g").on("mouseout", function(event){
+					Snap(this).select("circle").animate({r: Touchy.current.radiusSmall}, 100);
+				});
+				
+
+				Touchy.jQuery(s.node).find("g").on("mousedown", function(event){
+					if(!event.originalEvent)
+						return;
+					
+					var trans = Snap.parseTransformString(Snap(event.currentTarget).transform());
+					
+					Touchy.current.drag.startAt = [trans[0][1], trans[0][2]];
+					Touchy.current.drag.startAtAbs = [event.originalEvent.clientX, event.originalEvent.clientY];
+					
+					
+					if(typeof Touchy.current.drag.bow === "undefined"){
+						Touchy.current.drag.bow = 0;
+						Touchy.current.drag.bowLast = 0;
+					}
+					
+					Touchy.current.drag.mouseDown = true;
+				});
+				
+				
+				Touchy.jQuery(window).on("mouseup", function(event){
+					Touchy.current.drag.bowLast += Touchy.current.drag.bow;
+					
+					Touchy.current.drag.mouseDown = false;
+				});
+				
+				
+				Touchy.jQuery(window).on("mousemove", function(event){
+					if(!Touchy.current.drag.mouseDown)
+						return;
+					
+					event.preventDefault();
+					event.stopPropagation();
+					
+					var options = Touchy.current;
+					
+					var dx = event.originalEvent.clientX - options.drag.startAtAbs[0];
+					var dy = event.originalEvent.clientY - options.drag.startAtAbs[1];
+					
+					
+					var AB_x = options.drag.startAt[0] - options.center[0];
+					var AB_y = options.drag.startAt[1] - options.center[1];
+
+					var CD_x = options.drag.startAt[0] + dx - options.center[0];
+					var CD_y = options.drag.startAt[1] + dy - options.center[1];
+
+					var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
+					var bow = Math.acos(ort);
+
+					var leftyRighty = CD_y * AB_x - AB_y * CD_x;
+
+					var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
+
+					bow = bow * sign;
+
+					options.drag.bow = bow;
+					bow = bow + options.drag.bowLast;
+					
+					
+					for(var j = 0; j < options.elements.length; j++){
+						var rot = j * options.winkel - (Math.PI / 4) + bow;
+
+						var x = Math.cos(rot) * options.radiusBig;
+						var y = Math.sin(rot) * options.radiusBig;
+
+						var g = options.elements[j].g;
+						
+						var t = new Snap.Matrix();
+						t.translate(options.center[0] + x, options.center[1] + y);
+						g.transform(t);
+
+					}
+				});
+				
+				
+				Touchy.jQuery(s.node).find("g").on("touchstart", function(event){
+					if(!event.originalEvent)
+						return;
+					
+					if(!event.originalEvent.touches)
+						return;
+					
+					var trans = Snap.parseTransformString(Snap(event.currentTarget).transform());
+					
+					Touchy.current.drag.startAt = [trans[0][1], trans[0][2]];
+					Touchy.current.drag.startAtAbs = [event.originalEvent.touches[0].clientX, event.originalEvent.touches[0].clientY];
+					
+					
+					if(typeof Touchy.current.drag.bow === "undefined"){
+						Touchy.current.drag.bow = 0;
+						Touchy.current.drag.bowLast = 0;
+					}
+					
+				
+					/*var l1 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], Touchy.current.drag.startAt[0], Touchy.current.drag.startAt[1]);
+					l1.attr({"stroke": "black"});
+
+					var l2 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], Touchy.current.drag.startAt[0], Touchy.current.drag.startAt[1]);
+					l2.attr({"stroke": "red"});
+
+					Touchy.current.firstLine = l1;
+					Touchy.current.secondLine = l2;*/
+					
+					
+					Snap(this).select("circle").animate({r: Touchy.current.radiusSmallHover}, 100);
+				});
+
+
+				Touchy.jQuery(s.node).find("g").on("touchend", function(event){
+					Snap(this).select("circle").animate({r: Touchy.current.radiusSmall}, 100);
+					Touchy.current.drag.bowLast += Touchy.current.drag.bow;
+					/*if(Touchy.current.firstLine){
+						Touchy.current.firstLine.remove();
+						Touchy.current.secondLine.remove();
+					}*/
+				});
+				
+
+				Touchy.jQuery(s.node).find("g").on("touchmove", function(event){
+					event.preventDefault();
+					event.stopPropagation();
+					
+					var options = Touchy.current;
+					
+					var dx = event.originalEvent.touches[0].clientX - options.drag.startAtAbs[0];
+					var dy = event.originalEvent.touches[0].clientY - options.drag.startAtAbs[1];
+					
+					
+					var AB_x = options.drag.startAt[0] - options.center[0];
+					var AB_y = options.drag.startAt[1] - options.center[1];
+
+					var CD_x = options.drag.startAt[0] + dx - options.center[0];
+					var CD_y = options.drag.startAt[1] + dy - options.center[1];
+
+					var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
+					var bow = Math.acos(ort);
+
+					var leftyRighty = CD_y * AB_x - AB_y * CD_x;
+
+					var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
+
+					bow = bow * sign;
+
+					options.drag.bow = bow;
+					bow = bow + options.drag.bowLast;
+					
+					/*options.secondLine.attr({
+						"x2": options.drag.startAt[0] + dx, 
+						"y2": options.drag.startAt[1] + dy});*/
+					
+					for(var j = 0; j < options.elements.length; j++){
+						var rot = j * options.winkel - (Math.PI / 4) + bow;
+
+						var x = Math.cos(rot) * options.radiusBig;
+						var y = Math.sin(rot) * options.radiusBig;
+
+						var g = options.elements[j].g;
+						
+						var t = new Snap.Matrix();
+						t.translate(options.center[0] + x, options.center[1] + y);
+						g.transform(t);
+
+					}
+				});
+				
+				
 			}
 	},
 	
@@ -186,8 +366,10 @@ var Touchy = {
 				var x = Math.cos(bow) * options.radiusBig;
 				var y = Math.sin(bow) * options.radiusBig;
 
+				var g = Touchy.draw.circle(s, [startX + x, startY + y], key, options.data[key], Touchy.calc.value(options) == key);
+				
 				options.elements.push(
-					{"g" : Touchy.draw.circle(s, [startX + x, startY + y], key, options.data[key], Touchy.calc.value(options) == key)
+					{"g" : g
 				});
 				
 				if(typeof options.drag.minPi === "undefined")
@@ -200,7 +382,7 @@ var Touchy = {
 			for(var j = 0; j < options.elements.length; j++){
 				var g = options.elements[j].g;
 
-				Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
+				//Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
 
 
 				window.setTimeout(function(lc, lj){
@@ -219,7 +401,7 @@ var Touchy = {
 				var y = Math.sin(i * options.winkel - (Math.PI / 4)) * options.radiusBig;
 
 				var g = Touchy.draw.cancel(s, [startX + x, startY + y]);
-				Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
+				//Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
 
 				window.setTimeout(function(lc){
 					lc.animate({r: options.radiusSmall}, 150);
@@ -243,129 +425,22 @@ var Touchy = {
 		},
 				
 		circle: function(s, center, value, label, isSelected){
-			var x = center[0];
-			var y = center[1];
-
-			var c = s.circle(x, y, 0);
+			var c = s.circle(0, 0, 0);
 			c.attr({"class": "touchy-wheel-circle"+(isSelected ? " touchy-wheel-value" : ""), "fill-opacity": 1});
 
 			var tt = s.text(-100, -100, label);
-			var t = s.text(x - (tt.getBBox().width / 2), y + (tt.getBBox().height / 4), label);
+			var t = s.text(0 - (tt.getBBox().width / 2), 0 + (tt.getBBox().height / 4), label);
 			t.attr({ "fill-opacity": 0, "class": "touchy-wheel-text" });
 			tt.remove();
 
 			var g = s.g(c, t);
 			g.node.touchyValue = value;
-
-			return g;
-		}
-	},
-		
-	animate: {
-		circle: function(g, radiusDefault, radiusOver){
-			g.mouseover(function(){
-				this.select("circle").animate({r: radiusOver}, 100);
-			});
-
-			g.touchstart(function(){
-				this.select("circle").animate({r: radiusOver}, 100);
-			});
-
-
-			g.mouseout(function(){
-				this.select("circle").animate({r: radiusDefault}, 100);
-			});
-
-			g.touchend(function(){
-				this.select("circle").animate({r: radiusDefault}, 100);
-			});
-
-
-			g.touchcancel(function(){
-				this.select("circle").animate({r: radiusDefault}, 100);
-			});
 			
-			g.drag(function(dx, dy){
-				var AB_x = Touchy.current.drag.startAt[0] - Touchy.current.center[0];
-				var AB_y = Touchy.current.drag.startAt[1] - Touchy.current.center[1];
-
-				var CD_x = Touchy.current.drag.startAt[0] + dx - Touchy.current.center[0];
-				var CD_y = Touchy.current.drag.startAt[1] + dy - Touchy.current.center[1];
-
-				var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
-				var bow = Math.acos(ort);
+			var t = new Snap.Matrix();
+			t.translate(center[0], center[1]);
+			g.transform(t);
 				
-				var leftyRighty = CD_y * AB_x - AB_y * CD_x;
-				
-				var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
-				
-				bow *= sign;
-				
-				Touchy.current.drag.bow = bow;
-				bow += Touchy.current.drag.bowLast;
-				//console.log(Touchy.current.drag.bowLast);
-
-				/*var l = Touchy.current.secondLine;
-				l.attr({
-					"x2": Touchy.current.drag.startAt[0] + dx, 
-					"y2": Touchy.current.drag.startAt[1] + dy});*/
-				
-				
-				
-				for(var j = 0; j < Touchy.current.elements.length; j++){
-					var rot = j * Touchy.current.winkel - (Math.PI / 4) + bow;
-
-					/*if(rot > Touchy.current.drag.maxPi)
-						rot = Touchy.current.drag.maxPi;
-					else
-						if(rot < Touchy.current.drag.minPi)
-						rot = Touchy.current.drag.minPi; */
-					
-					var x = Math.cos(rot) * Touchy.current.radiusBig;
-					var y = Math.sin(rot) * Touchy.current.radiusBig;
-				
-					var g = Touchy.current.elements[j].g;
-					
-					//var norm = bow / Touchy.current.winkel * Math.PI;
-					
-					g.select("circle").attr({
-						"cx" : Touchy.current.center[0] + x,
-						"cy" : Touchy.current.center[1] + y//,
-						//"r" : Touchy.current.radiusSmall * Math.sin(norm)
-						});
-					//var t = s.text(x - (tt.getBBox().width / 2), y + (tt.getBBox().height / 4), label);
-					var t = g.select("text");
-					
-					t.attr({
-						"x" : Touchy.current.center[0] + x - (t.getBBox().width / 2), 
-						"y" : Touchy.current.center[1] + y + (t.getBBox().height / 4)});
-					
-				}
-				
-			},
-			function(){
-				Touchy.current.drag.startAt = [parseFloat(this.select("circle").attr("cx")), parseFloat(this.select("circle").attr("cy"))];
-				
-				if(typeof Touchy.current.drag.bow === "undefined"){
-					Touchy.current.drag.bow = 0;
-					Touchy.current.drag.bowLast = 0;
-				}
-				
-				/*var l1 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], this.select("circle").attr("cx"), this.select("circle").attr("cy"));
-				l1.attr({"stroke": "black"});
-				
-				var l2 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], this.select("circle").attr("cx"), this.select("circle").attr("cy"));
-				l2.attr({"stroke": "red"});
-				
-				Touchy.current.firstLine = l1;
-				Touchy.current.secondLine = l2;*/
-			},
-			function(){
-				/*Touchy.current.firstLine.remove();
-				Touchy.current.secondLine.remove();*/
-				
-				Touchy.current.drag.bowLast += Touchy.current.drag.bow;
-			});
+			return g;
 		}
 	}
 };
