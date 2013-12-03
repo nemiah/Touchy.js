@@ -40,11 +40,13 @@ var Touchy = {
 			if(typeof options.hasCancel === "undefined")
 				options.hasCancel = true;
 			
+			options.rotateLimit = 7;
+			
 			if(typeof options.radiusBig === "undefined")
 				options.radiusBig = 100;
 			
 			if(typeof options.radiusSmall === "undefined")
-				options.radiusSmall = (2 * Math.PI * options.radiusBig) / Touchy.calc.elements(options) / 2.3;
+				options.radiusSmall = (2 * Math.PI * options.radiusBig) / Touchy.calc.elements(options, true) / 2.3;
 
 				
 			if(typeof options.radiusSmallHover === "undefined")
@@ -58,7 +60,7 @@ var Touchy = {
 			
 			
 			if(typeof options.winkel === "undefined")
-				options.winkel = Math.PI * 1.9 / Touchy.calc.elements(options);
+				options.winkel = Math.PI * 1.9 / Touchy.calc.elements(options, true);
 			
 			options.drag = {};
 			
@@ -74,6 +76,8 @@ var Touchy = {
 	
 	event: {
 		wheel: function(s, options){
+				Touchy.current.drag.skip = 0;
+				
 				Touchy.jQuery(s.node).find("g").on(Touchy.trigger, function(event){
 					event.preventDefault();
 					event.stopPropagation();
@@ -85,7 +89,7 @@ var Touchy = {
 							Snap(lastValue).attr({"class": "touchy-wheel-circle"});
 
 						Snap(this).select("circle").attr({"class": "touchy-wheel-circle touchy-wheel-value"});
-						options.selection(value, options.data[value]);
+						Touchy.current.selection(value, Touchy.current.data[value]);
 					}
 
 					var current = this;
@@ -113,8 +117,8 @@ var Touchy = {
 							Snap(current).select("text").animate({"fill-opacity": 0}, 100, null, function(){ });
 					}, 500);
 
-					//return false; //maybe required for preventing click event to bubble up
-
+					Touchy.jQuery(window).off("mousemove", Touchy.event.movemouse);
+					Touchy.jQuery(s.node).find("g").off("touchmove", Touchy.event.movetouch);
 				});
 
 
@@ -151,54 +155,6 @@ var Touchy = {
 					Touchy.current.drag.bowLast += Touchy.current.drag.bow;
 					
 					Touchy.current.drag.mouseDown = false;
-				});
-				
-				
-				Touchy.jQuery(window).on("mousemove", function(event){
-					if(!Touchy.current.drag.mouseDown)
-						return;
-					
-					event.preventDefault();
-					event.stopPropagation();
-					
-					var options = Touchy.current;
-					
-					var dx = event.originalEvent.clientX - options.drag.startAtAbs[0];
-					var dy = event.originalEvent.clientY - options.drag.startAtAbs[1];
-					
-					
-					var AB_x = options.drag.startAt[0] - options.center[0];
-					var AB_y = options.drag.startAt[1] - options.center[1];
-
-					var CD_x = options.drag.startAt[0] + dx - options.center[0];
-					var CD_y = options.drag.startAt[1] + dy - options.center[1];
-
-					var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
-					var bow = Math.acos(ort);
-
-					var leftyRighty = CD_y * AB_x - AB_y * CD_x;
-
-					var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
-
-					bow = bow * sign;
-
-					options.drag.bow = bow;
-					bow = bow + options.drag.bowLast;
-					
-					
-					for(var j = 0; j < options.elements.length; j++){
-						var rot = j * options.winkel - (Math.PI / 4) + bow;
-
-						var x = Math.cos(rot) * options.radiusBig;
-						var y = Math.sin(rot) * options.radiusBig;
-
-						var g = options.elements[j].g;
-						
-						var t = new Snap.Matrix();
-						t.translate(options.center[0] + x, options.center[1] + y);
-						g.transform(t);
-
-					}
 				});
 				
 				
@@ -244,63 +200,116 @@ var Touchy = {
 					}*/
 				});
 				
-
-				Touchy.jQuery(s.node).find("g").on("touchmove", function(event){
-					event.preventDefault();
-					event.stopPropagation();
-					
-					var options = Touchy.current;
-					
-					var dx = event.originalEvent.touches[0].clientX - options.drag.startAtAbs[0];
-					var dy = event.originalEvent.touches[0].clientY - options.drag.startAtAbs[1];
-					
-					
-					var AB_x = options.drag.startAt[0] - options.center[0];
-					var AB_y = options.drag.startAt[1] - options.center[1];
-
-					var CD_x = options.drag.startAt[0] + dx - options.center[0];
-					var CD_y = options.drag.startAt[1] + dy - options.center[1];
-
-					var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
-					var bow = Math.acos(ort);
-
-					var leftyRighty = CD_y * AB_x - AB_y * CD_x;
-
-					var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
-
-					bow = bow * sign;
-
-					options.drag.bow = bow;
-					bow = bow + options.drag.bowLast;
-					
-					/*options.secondLine.attr({
-						"x2": options.drag.startAt[0] + dx, 
-						"y2": options.drag.startAt[1] + dy});*/
-					
-					for(var j = 0; j < options.elements.length; j++){
-						var rot = j * options.winkel - (Math.PI / 4) + bow;
-
-						var x = Math.cos(rot) * options.radiusBig;
-						var y = Math.sin(rot) * options.radiusBig;
-
-						var g = options.elements[j].g;
-						
-						var t = new Snap.Matrix();
-						t.translate(options.center[0] + x, options.center[1] + y);
-						g.transform(t);
-
-					}
-				});
+				if(Touchy.calc.elements(options, false) <= options.rotateLimit)
+					return;
+				
+				Touchy.jQuery(window).on("mousemove", Touchy.event.movemouse);
+				Touchy.jQuery(s.node).find("g").on("touchmove", Touchy.event.movetouch);
 				
 				
+			},
+			
+			movetouch: function(event){
+				event.preventDefault();
+				event.stopPropagation();
+
+				if(Touchy.current.drag.skip < 3){
+					Touchy.current.drag.skip++;
+					return;
+				}
+
+				Touchy.current.drag.skip = 0;
+
+				var options = Touchy.current;
+
+				var dx = event.originalEvent.touches[0].clientX - options.drag.startAtAbs[0];
+				var dy = event.originalEvent.touches[0].clientY - options.drag.startAtAbs[1];
+
+
+				var AB_x = options.drag.startAt[0] - options.center[0];
+				var AB_y = options.drag.startAt[1] - options.center[1];
+
+				var CD_x = options.drag.startAt[0] + dx - options.center[0];
+				var CD_y = options.drag.startAt[1] + dy - options.center[1];
+
+				Touchy.event.movegeneric(options, AB_x, AB_y, CD_x, CD_y);
+			},
+			
+			movemouse: function(event){
+				if(!Touchy.current.drag.mouseDown)
+					return;
+
+				if(Touchy.current.drag.skip < 3){
+					Touchy.current.drag.skip++;
+					return;
+				}
+
+				Touchy.current.drag.skip = 0;
+
+				event.preventDefault();
+				event.stopPropagation();
+
+				var options = Touchy.current;
+
+				var dx = event.originalEvent.clientX - options.drag.startAtAbs[0];
+				var dy = event.originalEvent.clientY - options.drag.startAtAbs[1];
+
+
+				var AB_x = options.drag.startAt[0] - options.center[0];
+				var AB_y = options.drag.startAt[1] - options.center[1];
+
+				var CD_x = options.drag.startAt[0] + dx - options.center[0];
+				var CD_y = options.drag.startAt[1] + dy - options.center[1];
+
+				Touchy.event.movegeneric(options, AB_x, AB_y, CD_x, CD_y);
+			},
+					
+			movegeneric: function(options, AB_x, AB_y, CD_x, CD_y){
+				var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
+				var bow = Math.acos(ort);
+
+				var leftyRighty = CD_y * AB_x - AB_y * CD_x;
+
+				var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
+
+				bow = bow * sign;
+
+				options.drag.bow = bow;
+				bow = bow + options.drag.bowLast;
+
+				/*options.secondLine.attr({
+					"x2": options.drag.startAt[0] + dx, 
+					"y2": options.drag.startAt[1] + dy});*/
+
+
+				for(var j = 0; j < options.elements.length; j++){
+					var rot = j * options.winkel - (Math.PI / 4) + bow;
+					//var rot = rot - ((rot % (Math.PI * 2)) * (Math.PI * 2));
+					//console.log(options.drag.maxPi);
+					//if(baserot > options.drag.maxPi)
+					//	rot = options.drag.maxPi;
+					
+					var x = Math.cos(rot) * options.radiusBig;
+					var y = Math.sin(rot) * options.radiusBig;
+
+					var g = options.elements[j].g;
+
+					var t = new Snap.Matrix();
+					t.translate(options.center[0] + x, options.center[1] + y);
+					g.transform(t);
+
+				}
 			}
 	},
 	
 	calc: {
-		elements: function(options){
-			var length = (options.hasCancel ? 1 : 0);
+		elements: function(options, includeOperations){
+			var length = ((includeOperations && options.hasCancel) ? 1 : 0);
 			for(var propertyName in options.data)
 				length++;
+			
+			if(includeOperations && length > options.rotateLimit)
+				length = options.rotateLimit + (options.hasCancel ? 1 : 0);
 			
 			return length;
 		},
@@ -362,32 +371,31 @@ var Touchy = {
 
 			var i = 0;
 			for(var key in options.data){
-				var bow = i * options.winkel - (Math.PI / 4);
+				var bow = (i < options.rotateLimit - 1 ? i : options.rotateLimit - 1) * options.winkel - (Math.PI / 4);
 				var x = Math.cos(bow) * options.radiusBig;
 				var y = Math.sin(bow) * options.radiusBig;
 
 				var g = Touchy.draw.circle(s, [startX + x, startY + y], key, options.data[key], Touchy.calc.value(options) == key);
 				
-				options.elements.push(
-					{"g" : g
-				});
+				options.elements.push({"g" : g});
 				
 				if(typeof options.drag.minPi === "undefined")
 					options.drag.minPi = bow;
 				
 				options.drag.maxPi = bow;
+				
 				i++;
 			}
+			
+			if(i > options.rotateLimit)
+				i = options.rotateLimit;
 			
 			for(var j = 0; j < options.elements.length; j++){
 				var g = options.elements[j].g;
 
-				//Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
-
-
-				window.setTimeout(function(lc, lj){
-					lc.animate({r: options.radiusSmall/* * Math.abs(Math.sin(lj * options.winkel / 2))*/}, 150);
-				}, j * 80, g.select("circle"), j);
+				window.setTimeout(function(lc){
+					lc.animate({r: options.radiusSmall}, 150);
+				}, j * 80, g.select("circle"));
 
 				window.setTimeout(function(lt){
 					lt.animate({
