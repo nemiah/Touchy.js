@@ -62,6 +62,8 @@ var Touchy = {
 			if(typeof options.winkel === "undefined")
 				options.winkel = Math.PI * 1.9 / Touchy.calc.elements(options, true);
 			
+			options.offset = Math.PI / 4;
+			
 			options.drag = {};
 			
 			var s = Touchy.draw.wheel(width, height, options);
@@ -141,6 +143,22 @@ var Touchy = {
 					Touchy.current.drag.startAt = [trans[0][1], trans[0][2]];
 					Touchy.current.drag.startAtAbs = [event.originalEvent.clientX, event.originalEvent.clientY];
 					
+					var text = Touchy.current.paper.text(0, 20, "bow");
+					
+					var l1 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], Touchy.current.drag.startAt[0], Touchy.current.drag.startAt[1]);
+					l1.attr({"stroke": "black"});
+
+					var l2 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], Touchy.current.drag.startAt[0], Touchy.current.drag.startAt[1]);
+					l2.attr({"stroke": "red"});
+
+					var l3 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], Touchy.current.center[0], 0);
+					l3.attr({"stroke": "green"});
+
+					Touchy.current.debug = {};
+					Touchy.current.debug.firstLine = l1;
+					Touchy.current.debug.secondLine = l2;
+					Touchy.current.debug.thirdLine = l3;
+					Touchy.current.debug.text = text;
 					
 					if(typeof Touchy.current.drag.bow === "undefined"){
 						Touchy.current.drag.bow = 0;
@@ -155,6 +173,13 @@ var Touchy = {
 					Touchy.current.drag.bowLast += Touchy.current.drag.bow;
 					
 					Touchy.current.drag.mouseDown = false;
+					
+					if(Touchy.current.debug){
+						Touchy.current.debug.firstLine.remove();
+						Touchy.current.debug.secondLine.remove();
+						Touchy.current.debug.thirdLine.remove();
+						Touchy.current.debug.text.remove();
+					}
 				});
 				
 				
@@ -176,17 +201,6 @@ var Touchy = {
 						Touchy.current.drag.bowLast = 0;
 					}
 					
-				
-					/*var l1 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], Touchy.current.drag.startAt[0], Touchy.current.drag.startAt[1]);
-					l1.attr({"stroke": "black"});
-
-					var l2 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], Touchy.current.drag.startAt[0], Touchy.current.drag.startAt[1]);
-					l2.attr({"stroke": "red"});
-
-					Touchy.current.firstLine = l1;
-					Touchy.current.secondLine = l2;*/
-					
-					
 					Snap(this).select("circle").animate({r: Touchy.current.radiusSmallHover}, 100);
 				});
 
@@ -194,10 +208,6 @@ var Touchy = {
 				Touchy.jQuery(s.node).find("g").on("touchend", function(event){
 					Snap(this).select("circle").animate({r: Touchy.current.radiusSmall}, 100);
 					Touchy.current.drag.bowLast += Touchy.current.drag.bow;
-					/*if(Touchy.current.firstLine){
-						Touchy.current.firstLine.remove();
-						Touchy.current.secondLine.remove();
-					}*/
 				});
 				
 				if(Touchy.calc.elements(options, false) <= options.rotateLimit)
@@ -261,33 +271,29 @@ var Touchy = {
 				var CD_x = options.drag.startAt[0] + dx - options.center[0];
 				var CD_y = options.drag.startAt[1] + dy - options.center[1];
 
+
+				Touchy.current.debug.secondLine.attr({
+					"x2": options.drag.startAt[0] + dx, 
+					"y2": options.drag.startAt[1] + dy});
+				
 				Touchy.event.movegeneric(options, AB_x, AB_y, CD_x, CD_y);
 			},
 					
 			movegeneric: function(options, AB_x, AB_y, CD_x, CD_y){
-				var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
-				var bow = Math.acos(ort);
-
-				var leftyRighty = CD_y * AB_x - AB_y * CD_x;
-
-				var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
-
-				bow = bow * sign;
+				var bow = Touchy.calc.bow(AB_x, AB_y, CD_x, CD_y);
 
 				options.drag.bow = bow;
 				bow = bow + options.drag.bowLast;
 
-				/*options.secondLine.attr({
-					"x2": options.drag.startAt[0] + dx, 
-					"y2": options.drag.startAt[1] + dy});*/
-
+				var bowV = Touchy.calc.bow(0, options.center[1], CD_x, CD_y) + Math.PI;
+				Touchy.jQuery(Touchy.current.debug.text.node).html(bowV);
 
 				for(var j = 0; j < options.elements.length; j++){
 					var rot = j * options.winkel - (Math.PI / 4) + bow;
 					//var rot = rot - ((rot % (Math.PI * 2)) * (Math.PI * 2));
 					//console.log(options.drag.maxPi);
-					//if(baserot > options.drag.maxPi)
-					//	rot = options.drag.maxPi;
+					if(rot > options.drag.maxPi)
+						rot = options.drag.maxPi;
 					
 					var x = Math.cos(rot) * options.radiusBig;
 					var y = Math.sin(rot) * options.radiusBig;
@@ -347,6 +353,17 @@ var Touchy = {
 				posY = Touchy.jQuery(window).height() - height - 10;
 
 			return [posX, posY];
+		},
+		
+		bow: function(AB_x, AB_y, CD_x, CD_y){
+			var ort = ((AB_x * CD_x) + (AB_y * CD_y)) / (Math.sqrt(Math.pow(AB_x, 2) + Math.pow(AB_y, 2)) * Math.sqrt(Math.pow(CD_x, 2) + Math.pow(CD_y, 2)));
+			var bow = Math.acos(ort);
+
+			var leftyRighty = CD_y * AB_x - AB_y * CD_x;
+
+			var sign = leftyRighty ? leftyRighty < 0 ? -1 : 1 : 0;
+
+			return bow * sign;
 		}
 	},
 	
@@ -371,7 +388,7 @@ var Touchy = {
 
 			var i = 0;
 			for(var key in options.data){
-				var bow = (i < options.rotateLimit - 1 ? i : options.rotateLimit - 1) * options.winkel - (Math.PI / 4);
+				var bow = (i < options.rotateLimit - 1 ? i : options.rotateLimit - 1) * options.winkel - (options.offset);
 				var x = Math.cos(bow) * options.radiusBig;
 				var y = Math.sin(bow) * options.radiusBig;
 
@@ -381,7 +398,7 @@ var Touchy = {
 				
 				if(typeof options.drag.minPi === "undefined")
 					options.drag.minPi = bow;
-				
+				console.log(bow);
 				options.drag.maxPi = bow;
 				
 				i++;
@@ -405,8 +422,8 @@ var Touchy = {
 			}
 
 			if(options.hasCancel){
-				var x = Math.cos(i * options.winkel - (Math.PI / 4)) * options.radiusBig;
-				var y = Math.sin(i * options.winkel - (Math.PI / 4)) * options.radiusBig;
+				var x = Math.cos(i * options.winkel - options.offset) * options.radiusBig;
+				var y = Math.sin(i * options.winkel - options.offset) * options.radiusBig;
 
 				var g = Touchy.draw.cancel(s, [startX + x, startY + y]);
 				//Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
