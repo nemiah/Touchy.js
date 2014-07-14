@@ -57,6 +57,7 @@
 			</script>
 			
 		</section>
+		
 			<pre>
 Touchy.wheel($('#wheelTouchy'), {
 	data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°",
@@ -68,6 +69,41 @@ Touchy.wheel($('#wheelTouchy'), {
 		return $('#wheelSelected').html();
 	}
 });</pre>
+		
+		<section>
+			<h2>Rotating wheel selector</h2>
+
+			<div class="divButton" id="rotatingWheelTouchy" style="display:inline-block;margin-right:1em;">Show me!</div>
+			<div style="display:inline-block;">Selected: <span id="rotatingWheelSelected">25.0</span></div>
+			<script type="text/javascript">
+				Touchy.wheel($('#rotatingWheelTouchy'), {
+					data: {"17.0": "17,0°", "18.0": "18,0°", "19.0": "19,0°",
+						"20.0": "20,0°", "21.0": "21,0°", "22.0": "22,0°", "23.0": "23,0°",
+						"24.0": "24,0°", "25.0": "25,0°", "26.0": "26,0°"},
+					selection: function(value) {
+						$('#rotatingWheelSelected').html(value);
+					},
+					value: function() {
+						return $('#rotatingWheelSelected').html();
+					}
+				});
+			</script>
+			
+		</section>
+		
+			<pre>
+Touchy.wheel($('#rotatingWheelTouchy'), {
+	data: {"17.0": "17,0°", "18.0": "18,0°", "19.0": "19,0°",
+		"20.0": "20,0°", "21.0": "21,0°", "22.0": "22,0°", "23.0": "23,0°",
+		"24.0": "24,0°", "25.0": "25,0°", "26.0": "26,0°"},
+	selection: function(value) {
+		$('#rotatingWheelSelected').html(value);
+	},
+	value: function() {
+		return $('#rotatingWheelSelected').html();
+	}
+});</pre>
+		
 		<section>
 			
 			<h2>Get involved</h2>
