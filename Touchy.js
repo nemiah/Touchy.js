@@ -246,17 +246,17 @@ var Touchy = {
 			},
 			
 			movetouch: function(event){
-				Touchy.event.movegeneric(event.originalEvent.touches[0].clientX, event.originalEvent.touches[0].clientY);
+				Touchy.event.movegeneric(event, event.originalEvent.touches[0].clientX, event.originalEvent.touches[0].clientY);
 			},
 			
 			movemouse: function(event){
 				if(!Touchy.current.drag.mouseDown)
 					return;
 
-				Touchy.event.movegeneric(event.originalEvent.clientX, event.originalEvent.clientY);
+				Touchy.event.movegeneric(event, event.originalEvent.clientX, event.originalEvent.clientY);
 			},
 			
-			movegeneric: function(currentX, currentY){
+			movegeneric: function(event, currentX, currentY){
 				event.preventDefault();
 				event.stopPropagation();
 				
