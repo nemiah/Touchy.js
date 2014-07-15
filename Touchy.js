@@ -20,7 +20,8 @@
 
 var Touchy = {
 	jQuery: $,
-	svgX: [28,22.398, 19.594,14, 28,5.602, 22.398,0, 14,8.402, 5.598,0, 0,5.602, 8.398,14, 0,22.398, 5.598,28, 14,19.598, 22.398,28],
+	svgX: "M 28,22.398 18.115983,13.901466 28,5.602 22.693603,0.49267243 14,9.8800173 5.598,0.78827589 0,5.602 9.9745518,14 0,22.398 l 5.6965345,5.010793 8.1063965,-9.387345 8.693603,9.190276 z",
+	svgC: "M 0,13.794833 9.7000006,20.396643 28,6.109138 25.999999,0 9.8941376,14.977246 1.8999999,6.109138 z",
 	trigger: "click",
 	current: null,
 	
@@ -151,6 +152,9 @@ var Touchy = {
 
 						if(Snap(k).select("text"))
 							Snap(k).select("text").animate({"fill-opacity": 0}, 100, null, function(){ this.remove(); });
+						
+						if(Snap(k).select("path"))
+							Snap(k).select("path").animate({"fill-opacity": 0}, 100, null, function(){ this.remove(); });
 
 						Snap(k).select("circle").animate({r: 0}, 100 + i * 100, null, function(){ this.remove(); });
 						i++;
@@ -516,26 +520,44 @@ var Touchy = {
 				var x = Math.cos(i * options.winkel - options.offset) * options.radiusBig;
 				var y = Math.sin(i * options.winkel - options.offset) * options.radiusBig;
 
-				var g = Touchy.draw.cancel(s, [startX + x, startY + y]);
+				var symbol = null;
+				if(options.multi)
+					symbol = Touchy.svgC;
+				
+				var g = Touchy.draw.cancel(s, symbol);
 				//Touchy.animate.circle(g, options.radiusSmall, options.radiusSmallHover);
-
+				
+				Touchy.util.translate(g, startX + x, startY + y);
+				
 				window.setTimeout(function(lc){
 					lc.animate({r: options.radiusSmall}, 150);
 				}, i * 80, g.select("circle"));
+				
+				window.setTimeout(function(lt){
+					lt.animate({
+						"fill-opacity": 1
+					}, 200);
+				}, i * 100 + 200, g.select("path"));
 			}
 			
 			return s;
 		},
 				
-		cancel: function(s, center){
-			var x = center[0];
-			var y = center[1];
-
-			var c = s.circle(x, y, 0);
+		cancel: function(s, symbol){
+			var c = s.circle(0, 0, 0);
 			c.attr({"class": "touchy-wheel-circle", "fill-opacity": 1});
 
-			g = s.g(c);
-			
+			if(symbol){
+				var x = s.path(symbol);
+				x.attr({"class": "touchy-wheel-cancel-symbol", "fill-opacity": 0});
+				Touchy.util.translate(x, -x.getBBox().w / 2, -x.getBBox().h / 2);
+				
+				var g = s.g(c, x);
+			} else {
+				var g = s.g(c);
+			}
+
+			//var g = s.g(c, x);
 			g.node.touchyIsCancel = true;
 			
 			g.attr({"class": "touchy-wheel-cancel", "fill-opacity": 0});

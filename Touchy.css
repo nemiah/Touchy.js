@@ -65,3 +65,7 @@
 	
     transition: fill 200ms linear;
 }
+
+.touchy-wheel-cancel-symbol {
+	fill:#d9e800;
+}
