@@ -58,7 +58,7 @@ var Touchy = {
 			var width = options.radiusBig * 2 + options.radiusSmallHover * 2;
 			var height = width;
 			
-			if(typeof options.position === "undefined")
+			if(!options.position)
 				options.position = Touchy.util.position(event, width, height);
 			
 			
@@ -372,13 +372,14 @@ var Touchy = {
 			if(posY < 10)
 				posY = 10;
 
-			posY += Touchy.jQuery(window).scrollTop();
-
+			
 			if(posX + width > Touchy.jQuery(window).width())
 				posX = Touchy.jQuery(window).width() - width - 10;
 
 			if(posY + height > Touchy.jQuery(window).height())
 				posY = Touchy.jQuery(window).height() - height - 10;
+
+			posY += Touchy.jQuery(window).scrollTop();
 
 			return [posX, posY];
 		},
@@ -401,7 +402,8 @@ var Touchy = {
 	draw: {
 		wheel: function(width, height, options){
 			var pos = options.position;
-
+			options.position = null;
+			
 			var s = Snap(width, height);
 			Touchy.jQuery(s.node).css("position","absolute").css("top", pos[1]).css("left", pos[0]);
 
