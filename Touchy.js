@@ -168,14 +168,12 @@ var Touchy = {
 					if(!event.originalEvent)
 						return;
 					
-					var trans = Snap.parseTransformString(Snap(event.currentTarget).transform());
-
-					//Touchy.current.drag.startAt = [trans[0][1], trans[0][2]];
-					//Touchy.current.drag.startAtAbs = [event.originalEvent.clientX, event.originalEvent.clientY];
-					if(trans[0]){
-						Touchy.current.drag.lastAt = [trans[0][1], trans[0][2]];
-						Touchy.current.drag.lastAtAbs = [event.originalEvent.clientX, event.originalEvent.clientY];
-					}
+					var trans = Snap(event.currentTarget).transform().localMatrix;
+					
+					if(trans)
+						Touchy.current.drag.lastAt = [trans.e, trans.f];
+					
+					Touchy.current.drag.lastAtAbs = [event.originalEvent.clientX, event.originalEvent.clientY];
 					/*var text = Touchy.current.paper.text(0, 20, "bow");
 					
 					var l1 = Touchy.current.paper.line(Touchy.current.center[0], Touchy.current.center[1], Touchy.current.drag.startAt[0], Touchy.current.drag.startAt[1]);
@@ -219,14 +217,12 @@ var Touchy = {
 					if(!event.originalEvent.touches)
 						return;
 					
-					var trans = Snap.parseTransformString(Snap(event.currentTarget).transform());
+					var trans = Snap(event.currentTarget).transform().localMatrix;
+
+					if(trans)
+						Touchy.current.drag.lastAt = [trans.e, trans.f];
 					
-					//Touchy.current.drag.startAt = [trans[0][1], trans[0][2]];
-					//Touchy.current.drag.startAtAbs = [event.originalEvent.touches[0].clientX, event.originalEvent.touches[0].clientY];
-					if(trans[0]){
-						Touchy.current.drag.lastAt = [trans[0][1], trans[0][2]];
-						Touchy.current.drag.lastAtAbs = [event.originalEvent.touches[0].clientX, event.originalEvent.touches[0].clientY];
-					}
+					Touchy.current.drag.lastAtAbs = [event.originalEvent.touches[0].clientX, event.originalEvent.touches[0].clientY];
 					
 					Snap(this).select("circle").animate({r: Touchy.current.radiusSmallHover}, 100);
 				});
