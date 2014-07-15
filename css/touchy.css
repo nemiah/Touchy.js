@@ -8,7 +8,7 @@ h2 {
 	margin-top:7%;
 	font-family: 'Neucha', cursive;
 	font-size:3em;
-	margin-bottom:1%;
+	margin-bottom:-0.1em;
 }
 
 h3 {
@@ -21,6 +21,7 @@ h3 {
 header {
 	margin-left:10%;
 	margin-right:10%;
+	margin-bottom:4em;
 }
 
 header p {
@@ -35,7 +36,7 @@ section {
 }
 
 pre {
-	margin-top:2em;
+	margin-top:0em;
 	font-size:.9em;
 	/*border-top:0.2em solid #ffe400;
 	border-bottom:0.2em solid #ffe400;*/
@@ -46,4 +47,34 @@ pre {
 
 footer {
 	min-height:5em;
+}
+
+
+.bg a:link, .bg a:visited, .bg a:active {
+	color:grey;
+}
+
+.bg a:hover {
+	text-decoration: none;
+}
+
+
+.bg {
+	padding-left:10%;
+	background-color:#efefef;
+	padding-top:2em;
+	padding-bottom:2em;
+}
+
+.example .bg {
+	padding-left:20%;
+}
+
+.example section {
+	margin-left:20%;
+}
+
+.example {
+	width:50%;
+	display:inline-block;
 }

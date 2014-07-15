@@ -40,70 +40,71 @@
 			<p style="color:grey;">JavaScript library for touch optimized input elements</p>
 		</header>
 
-		<section>
-			<h2>Wheel selector</h2>
-
-			<div class="divButton" id="wheelTouchy" style="display:inline-block;margin-right:1em;">Show me!</div>
-			<div style="display:inline-block;">Selected: <span id="wheelSelected">17.0</span></div>
-			<script type="text/javascript">
-				Touchy.wheel($('#wheelTouchy'), {
-					data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°", "22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
-					selection: function(value) {
-						$('#wheelSelected').html(value);
-					},
-					value: function() {
-						return $('#wheelSelected').html();
-					}
-				});
-			</script>
-			
-		</section>
-		
-			<pre>
-Touchy.wheel($('#wheelTouchy'), {
-	data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°",
-		"22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
-	selection: function(value) {
-		$('#wheelSelected').html(value);
-	},
-	value: function() {
-		return $('#wheelSelected').html();
-	}
-});</pre>
-		
+		<div class="example">
+			<section>
+				<h2>Wheel selector</h2>
+			</section>
+			<div class="bg">
+				<div class="divButton" id="wheelTouchy" style="display:inline-block;margin-right:1em;">Show me!</div>
+				<div style="display:inline-block;">Selected: <span id="wheelSelected">17.0</span></div>
+				<script type="text/javascript">
+					Touchy.wheel($('#wheelTouchy'), {
+						data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°", "22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
+						selection: function(value) {
+							$('#wheelSelected').html(value);
+						},
+						value: function() {
+							return $('#wheelSelected').html();
+						}
+					});
+				</script>
+			</div>
+		</div><div class="example">
 		<section>
 			<h2>Rotating wheel selector</h2>
-
-			<div class="divButton" id="rotatingWheelTouchy" style="display:inline-block;margin-right:1em;">Show me!</div>
-			<div style="display:inline-block;">Selected: <span id="rotatingWheelSelected">24.0</span></div>
-			<script type="text/javascript">
-				Touchy.wheel($('#rotatingWheelTouchy'), {
-					data: {"17.0": "17,0°", "18.0": "18,0°", "19.0": "19,0°",
-						"20.0": "20,0°", "21.0": "21,0°", "22.0": "22,0°", "23.0": "23,0°",
-						"24.0": "24,0°", "25.0": "25,0°", "26.0": "26,0°"},
-					selection: function(value) {
-						$('#rotatingWheelSelected').html(value);
-					},
-					value: function() {
-						return $('#rotatingWheelSelected').html();
-					}
-				});
-			</script>
-			
 		</section>
 		
-			<pre>
-Touchy.wheel($('#rotatingWheelTouchy'), {
-	data: {"17.0": "17,0°", "18.0": "18,0°", "19.0": "19,0°",
-		"20.0": "20,0°", "21.0": "21,0°", "22.0": "22,0°", "23.0": "23,0°",
-		"24.0": "24,0°", "25.0": "25,0°", "26.0": "26,0°"},
-	selection: function(value) {
-		$('#rotatingWheelSelected').html(value);
-	},
-	value: function() {
-		return $('#rotatingWheelSelected').html();
-	}
-});</pre>
+		<div class="bg">
+				<div class="divButton" id="rotatingWheelTouchy" style="display:inline-block;margin-right:1em;">Show me!</div>
+				<div style="display:inline-block;">Selected: <span id="rotatingWheelSelected">24.0</span></div>
+				<script type="text/javascript">
+					Touchy.wheel($('#rotatingWheelTouchy'), {
+						data: {"17.0": "17,0°", "18.0": "18,0°", "19.0": "19,0°",
+							"20.0": "20,0°", "21.0": "21,0°", "22.0": "22,0°", "23.0": "23,0°",
+							"24.0": "24,0°", "25.0": "25,0°", "26.0": "26,0°"},
+						selection: function(value) {
+							$('#rotatingWheelSelected').html(value);
+						},
+						value: function() {
+							return $('#rotatingWheelSelected').html();
+						}
+					});
+				</script>
+			</div>
+		</div><div>
+			<section>
+				<h2>Wheel multi selector</h2>
+			</section>
+
+			<div class="bg">
+				<div class="divButton" id="multiWheelTouchy" style="display:inline-block;margin-right:1em;">Show me!</div>
+				<div style="display:inline-block;">Selected: <span id="multiWheelSelected">17.0, 18.0</span></div>
+				<script type="text/javascript">
+					Touchy.wheel($('#multiWheelTouchy'), {
+						data: {"17.0": "17,0°", "18.0": "18,0°", "19.0": "19,0°",
+							"20.0": "20,0°", "21.0": "21,0°", "22.0": "22,0°", "23.0": "23,0°"},
+						selection: function(value) {
+							$('#multiWheelSelected').html(value.join(", "));
+						},
+						value: function() {
+							return $('#multiWheelSelected').html().split(", ");
+						},
+						multi:true
+					});
+				</script>
+			</div>
+
+		</div>
 		
 		<section>
 			
@@ -113,7 +114,7 @@ Touchy.wheel($('#rotatingWheelTouchy'), {
 			<h2>More to come</h2>
 			<p>Touchy.js is in a very early state and currently planned are the following data inputs:</p>
 			<ul>
-				<li>Wheel selection for multiple entries</li>
+				<li><del>Wheel selection for multiple entries</del></li>
 				<li>Time selection</li>
 				<li>Date selection</li>
 				<li>Data selection with longer labels</li>
