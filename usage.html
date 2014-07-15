@@ -40,7 +40,7 @@
 		<h1>Touchy.js demo page</h1>
 		
 		<div class="divButton" id="touchyWheel" style="margin-left:100px;margin-top:100px;display:inline-block;margin-right:10px;">Wheel selector</div>
-		<div style="display:inline-block;">Selected: <span id="selectedWheelValue">17.0</span>; <span id="selectedWheelLabel">17,0°</span></div>
+		<div style="margin-left:100px;">Selected: <span id="selectedWheelValue">17.0</span> <span id="selectedWheelLabel" style="color:grey;">17,0°</span></div>
 		
 		<script type="text/javascript">
 			Touchy.wheel($('#touchyWheel'), {
@@ -57,7 +57,7 @@
 		<br />
 		
 		<div class="divButton" id="touchyWheelRotate" style="margin-left:100px;margin-top:100px;display:inline-block;margin-right:10px;">Rotating wheel selector</div>
-		<div style="display:inline-block;">Selected: <span id="selectedWheelRotateValue">7</span>; <span id="selectedWheelRotateLabel">7</span></div>
+		<div style="margin-left:100px;">Selected: <span id="selectedWheelRotateValue">7</span> <span id="selectedWheelRotateLabel" style="color:grey;">7</span></div>
 		
 		<script type="text/javascript">
 			var data = {};
@@ -78,16 +78,21 @@
 		<br />
 		
 		<div class="divButton" id="touchyWheelMulti" style="margin-left:100px;margin-top:100px;display:inline-block;margin-right:10px;">Wheel multi selector</div>
-		<div style="display:inline-block;">Selected: <span id="selectedWheelMulti">17.0</span></div>
+		<div style="margin-left:100px;">Selected: <span id="selectedWheelMulti">7; 6; 2; 3; 10</span> <span id="selectedWheelMultiLabel" style="color:grey;">7; 6; 2; 3; 10</span></div>
 		
 		<script type="text/javascript">
+			data = {};
+			for(var i = 0; i < 11; i++)
+				data[i+""] = i+"";
+			
 			Touchy.wheel($('#touchyWheelMulti'), {
-				data: {"17.0": "17,0°", "21.0": "21,0°", "21.5": "21,5°", "22.0": "22,0°", "22.5": "22,5°", "23.0": "23,0°", "28.0": "28,0°"},
+				data: data,
 				selection: function(values, labels){
 					$('#selectedWheelMulti').html(values.join("; "));
+					$('#selectedWheelMultiLabel').html(labels.join("; "));
 				},
 				value: function(){
-					return $('#selectedWheelMulti').html().split(";");
+					return $('#selectedWheelMulti').html().split("; ");
 				},
 				multi: true
 			});

@@ -116,9 +116,28 @@ var Touchy = {
 						if(lastValue)
 							Snap(lastValue).attr({"class": "touchy-wheel-circle"});*/
 
-						Snap(this).select("circle").attr({"class": "touchy-wheel-circle touchy-wheel-value"});
-						options.selected[0].push(value);
-						options.selected[1].push(Touchy.current.data[value]);
+						console.log(options.selected[0]);
+						if(Snap(this).node.touchyIsSelected){
+							Snap(this).select("circle").attr({"class": "touchy-wheel-circle"});
+							
+							
+							for(var i in options.selected[0])
+								if(options.selected[0][i] == value){
+									options.selected[0].splice(i, 1);
+									options.selected[1].splice(i, 1);
+									break;
+									
+								}
+							
+							Snap(this).node.touchyIsSelected = false;
+						} else {
+							Snap(this).select("circle").attr({"class": "touchy-wheel-circle touchy-wheel-value"});
+							options.selected[0].push(value);
+							options.selected[1].push(Touchy.current.data[value]);
+							
+							Snap(this).node.touchyIsSelected = true;
+						}
+						console.log(options.selected[0]);
 						
 						return;
 					}
@@ -233,7 +252,7 @@ var Touchy = {
 				});
 				
 				
-				//Dont continue if not enough elements for rotating
+				//Don't continue if not enough elements for rotating
 				if(Touchy.util.elements(options, false) <= options.rotateLimit)
 					return;
 				
@@ -299,7 +318,13 @@ var Touchy = {
 			t.translate(x, y);
 			g.transform(t);
 		},
-					
+		// Array Remove - By John Resig (MIT Licensed)
+		/*removeElement: function(arr, from, to) {
+			var rest = arr.slice((to || from) + 1 || arr.length);
+			arr.length = from < 0 ? arr.length + from : from;
+			return arr.push.apply(this, rest);
+		},*/
+		
 		spin: function(options, bow){
 			options.drag.bow += bow;
 
@@ -331,17 +356,12 @@ var Touchy = {
 		},
 		
 		isValue: function(options, key){
-			//console.log("--------------");
-			//console.log(key);
 			var currentValue = null;
 			if(typeof options.value === "function")
 				currentValue = options.value();
 
 			if(Array.isArray(currentValue)){
 				for(var k in currentValue){
-					//console.log(currentValue[k]);
-					//console.log(currentValue[k] == key);
-					
 					if(currentValue[k] == key)
 						return true;
 				}
@@ -431,7 +451,16 @@ var Touchy = {
 			//initialize circles
 			var i = 0;
 			for(var key in options.data){
-				var g = Touchy.draw.circle(s, [options.center[0], options.center[1]], key, options.data[key], Touchy.util.isValue(options, key));
+				var isValue = Touchy.util.isValue(options, key);
+
+				
+				var g = Touchy.draw.circle(s, [options.center[0], options.center[1]], key, options.data[key], isValue);
+				
+				if(isValue && options.multi){
+					options.selected[0].push(key);
+					options.selected[1].push(options.data[key]);
+					g.node.touchyIsSelected = true;
+				}
 				
 				options.elements.push({"g" : g});
 				
@@ -526,6 +555,7 @@ var Touchy = {
 			var g = s.g(c, t);
 			g.node.touchyValue = value;
 			g.node.touchyIsCancel = false;
+			g.node.touchyIsSelected = false;
 			
 			var t = new Snap.Matrix();
 			t.translate(center[0], center[1]);
